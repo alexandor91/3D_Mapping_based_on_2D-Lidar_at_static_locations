@@ -1,11 +1,23 @@
 # Project: Portabal 3D Mapping device based on 2D Lidar ############
 This repository is established for the master thesis program, to generate 3D mapping based on 2D Lidar, 2 modes can be chosen, mapping along motion & mapping from static locations. The generated map can be compared with the metric.
 ---
-
-**Setup Work on Laptop**
-
+**Setup Work on Raspberry -pi**
 ---
+All the work is put in a "~/slam_ws" wrokspace. The most convenient method is to clone the current whole system image on the Raspi from the SD card, and back up it or burn it into additional SD card, this mirror image contains the built_in ros framework, and the i2c-tools via
+```
+$ sudo apt-get install i2c-tools
 
+```
+The imu and stepper motor are connected via i2c, after the connection 
+```
+$ sudo i2cdetect -y 1
+
+```
+For more i2c installation details, please refer to [i2c on Raspberry](http://skpang.co.uk/blog/archives/575)<br />
+[SMBus python](https://github.com/pimoroni/py-smbus) is a python library for i2c protocol, to be used for our python coding.
+---
+**Setup Work on Laptop**
+---
 # Set up the Ros-kinetic version on your laptop
 ## 1.workspace at laptop
 Catkin-tools is integrated into the ros framework, the build and init of workspace can be referred in [catkin tool](http://catkin-tools.readthedocs.io/en/latest/installing.html). Copy catkin_ws, the whole folder into the home folder on your pc.
@@ -27,7 +39,7 @@ $ echo $ROS_PACKAGE_PATH /home/youruser/catkin_ws/src:/opt/ros/kinetic/share
 ```
 ## 2. Ros-kinetic Desktop-Full Version Install (Recommended):
 this version includes all common tools on Ros, follow the instructions from [installation on Ubuntu](http://wiki.ros.org/kinetic/Installation/Ubuntu), the ubuntu version should be <b> Ubuntu 16.04.3 LTS (Xenial Xerus) 64 bit</b>
-## 3. PCL 1.7 Installation
+## 3. PCL 1.7 Installation on laptop
 this (PCL) is a standalone, large scale, open project for 2D/3D image and point cloud processing. [PCL installation](http://pointclouds.org/downloads/). Here two options can be offered,
 <b>3.1 Integration with ROS</b> PCL (verison 1.7) is the backbone of ROS to process the 3D pointcloud, The library is written in c++, the installed Ros-kinetic, by default includes already the pcl-ros package. If you want to use PCL in you own project, like some other packages created by your own, follow the tutorials here, [PCL in your own project](http://pointclouds.org/documentation/tutorials/using_pcl_pcl_config.php#using-pcl-pcl-config), here the ralative path >"~/catkin_ws/src/fusion_octomap/CMakeLists.txt" is already modified according to the tutorial, so this own defined package can be directly compiled properly.<br />
 2 <b>3.2 PCL python</b> My code for Sweep lidar node is written in python, so the pcl python libarry should also be installed, in fact, >python-pcl includes a subset of functionalites of pcl, but that's enough.<br />
@@ -61,7 +73,7 @@ pcl_to_ros(pcl.PointCloud_PointXYZRGB)
 
 ```
 Converts XYZRGB Point Cloud to sensor_msgs/PointCloud2 <br />
-## 4. Octomap installation
+## 4. Octomap installation on laptop
 <b>4.1 Integration with ROS</b> The command below will install the octomap package,
 ```
 $ sudo apt-get install ros-kinetic-octomap
@@ -83,7 +95,7 @@ package.xml is supposed to modified accordingly, add to your package.xml:
 ```
 This work is done already for my own package >"~/catkin_ws/src/fusion_octomap", the CMakeLists.txt and package.xml can be used as reference if further developed package should be integrated into the whole work space.
 
-## 5. Visualization software
+## 5. Visualization software on laptop
 <b>a. pcl_viewer</b> <br />
 pcl-viewer is a software to visualize pointcloud on your pc, installation commands as below:
 ```
@@ -117,29 +129,9 @@ $ octovis single-pose.ot
 
 ```
 ---
-
-**Setup Work on Raspberry -pi**
-
----
-All the work is put in a "~/slam_ws" wrokspace. The most convenient method is to clone the current whole system image on the Raspi from the SD card, and back up it or burn it into additional SD card, this mirror image contains the built_in ros framework, and the i2c-tools via
-```
-$ sudo apt-get install i2c-tools
-
-```
-The imu and stepper motor are connected via i2c, after the connection 
-```
-$ sudo i2cdetect -y 1
-
-```
-For more i2c installation details, please refer to [i2c on Raspberry](http://skpang.co.uk/blog/archives/575)<br />
-[SMBus python](https://github.com/pimoroni/py-smbus) is a python library for i2c protocol, to be used for our python coding.
-
----
-
 **Run Ros Nodes**
-
 ---
-# Set up Ros network
+## Set up Ros network
 The network should be set up to notify the nodes run on different machines,
 1. Make sure the raspberry and your PC, both are connected to a same wireless local network, all the machines are supposed to be connected to HUAWEI-681D, portable WIFI, on raspberry this should be checked via "ifconfig", because it may connect to other signals nearby. <br />
  
@@ -176,7 +168,7 @@ The name through "TAB" to be completed, or you can also run the node separately 
 $ rosrun package-name nodename
 
 ```
-# Change USB permission & port number
+## Change USB permission & port number
 cd to the "/dev/ttyUSB*", then chang permission
  ```
 sudo chmod 666 /dev/ttyUSB*
@@ -213,11 +205,8 @@ Change the value of the name "serial_port" to the real number, for sweep this ca
                scanner.perform_scan()
 ```
 The parameters of Sweep Lidar should be changed according real number, 
-
 ---
-
 **Reference Map Generation**
-
 ---
 ![overall nodes flow](node-flow.PNG)
 <br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Overall nodes flow<br />
@@ -226,7 +215,7 @@ the following work is done sequentially as from node on Raspberry, untils the th
 ![nodes_static_scannning](nodes_static_scanning.png)
 <br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Static scanning<br />
 Figure "nodes_static_scanning" displays the actice nodes in static scanning mode, the rectangle inside each box is the topic, here two topic names, "/sweep_node/cloudpoint" from "sweep_node" and topic "pcl_filter/filtered_pcl" from node "pcl_filter". Finally pointcloud comes into octomap_server node.
-# Nodes on Raspberry
+## Nodes on Raspberry
 1. Setup IP  and MASTER_URI for this node and source the bash file:
 ```
 $ export ROS_MASTER_URI=http://192.168.8.--:11311
@@ -267,7 +256,7 @@ $ rosservice call /sweep_node/poses [400.0,800.0,800.0,400.0] [100.0,100.0,500.0
 ```
 Only the valus should be modified according to the real locations, the first value to "Pose_num" is number of locations, after the service is properly recieved, the "success" will be returned to the request terminal, then the second command is to provide the coordinate of each location, x-y-z in oder. <br />
 The scanning process at each location will be performed repeatedly. Each scanning at a location has three stages, initiallization with settings, reset the base to trigger the limit switch, where the orientation is zero, then scannning is performed, after finish scanning, "finish" will be printed out, then stop the power for stepper motor, and move the whole kit to the new location, and power the stepper motor, after the completion of the resetting of base, the scanning process will be continued, after scanninng is finished at all locations, all the collected pointcloud will be published onto "/sweep_node/cloudpoint".
-# Nodes on Laptop
+## Nodes on Laptop
 1. Setup IP  and MASTER_URI for the launching node in terminal:
 ```
 $ export ROS_MASTER_URI=http://192.168.8.--:11311
@@ -309,11 +298,8 @@ $ rosrun octomap_server octomap_saver mapfile.ot
 
 ```
 This will convert the pointcloud to octomap, by default the mapfile.ot will be put into directory "~/catkin_ws/devel/".
-
 ---
-
 **Map Generation along Motion**
-
 ---
 
 ![overall nodes flow](node-flow.PNG)
@@ -323,7 +309,7 @@ the following work is done sequentially as from node on Raspberry, until the poi
 ![nodes_along_motion](nodes_along_motion.png)
 <br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Scanning along motion<br />
 
-# Nodes on Raspberry
+## Nodes on Raspberry
 1. Setup IP  and MASTER_URI for the launching node in terminal, same work as for reference map:
 ```
 $ export ROS_MASTER_URI=http://192.168.8.--:11311
@@ -349,7 +335,7 @@ $   <node name="Imu" pkg="mems_10dof" type="imu.py" output="screen"/>
 
 ```
 Change the node like above, in launch file, the "!-- ","--" is appended onto the start and end to comment the node, not to be executed, here the rasp-pi is packed into a plastic pack, so wires to connect imu can not pass through, so imu node is not activated in motion. But for data rosbag files, the imu data is also recorded into it, during experiment, the two rapsberry boards were utilized. imu file is locating in "~/slam_ws/src/mems_10dof/scripts/imu.py", the oublished topic from imu is "imu/data", which can visualized in rviz with imu class on left panel, just select the topic accordingly.
-# Nodes on Raspberry
+## Nodes on Raspberry
 3. Open a terminal on laptop. repeat the exporting process, or if you already copy the correct paths into ~/.bahrc file, just source bash file at root folder.
 ```
 $ source ~/catkin_ws/devel/setup.bash
@@ -388,4 +374,23 @@ $ roslaunch fusion_octomap view_octomap.launch
 $ rosrun octomap_server octomap_saver motion-mapfile.ot
 
 ```
+---
+**Rosbag Files Play-back**
+---
+All the ropics from different sensor along with the transform between different frames is recorded into the bag files ,[rosbag command](http://wiki.ros.org/rosbag/Commandline) 
+```
+$ cd /bagfiles
+$ rosbag play bagfilename.bag
+
+```
+Then the topics and transforms will be published, and the synchronizer node can run in this node to verify the perfomance of the algorithm. play rate can be speeded up via "$ rosbag play -r 10 recorded1.bag", "r" is rate, there are two types of bagfiles, bag files with "moton" in name is for scanning along motion, with "static" in name is for scanning at static location. The bag files recorded along motion has two types, one is with recording of imu data, the others are without imu recording. "big-box" means the relative distance between sweep Lidar and Rplidar, the default distance for small box, which  supports the Rplidar, offset should be changed to the offsets, corresponding to big box. "synchronizer" is locating in "~/catkin_ws/src/fusion_octomap/src",  change the values in line63 and line 64 according to comments. Then recompile the whole workspace before the running of the node.
+---
+**Metric**
+---
+The "compare_octrees.cpp" is for metric evaluation over two maps, locating in "~/catkin_ws/src/fusion_octomap/src", the ot files  for octomap should be put into the "~/catkin_ws/src/fusion_octomap/binary_maps", then the path and file name should be added into the path variable within the "compare_octrees.cpp", from line 28 to l29, then run metric node in another terminal,
+```
+$ rosrun fusion_octomap metricNode
+
+```
+The "metric logodds", "metric Iou", "metric correlation", the three values of these three metrics will be printed out in order.
 
