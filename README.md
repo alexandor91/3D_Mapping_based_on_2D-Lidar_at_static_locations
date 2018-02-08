@@ -217,7 +217,7 @@ The parameters of Sweep Lidar should be changed according real number,
 ---
 The reference map can be 
 # Nodes on Raspberry
-![Network structure](network_structure.jpg)
+![nodes_static_scannning](nodes_static_scanning.png)
 <br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Static scanning<br />
 1. Setup IP  and MASTER_URI for this node and source the bash file:
 ```
