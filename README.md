@@ -1,4 +1,4 @@
-# Project: Portabal 3D Mapping device based on 2D Lidar ############
+# Project: Portabal 3D Mapping device based on 2D Lidar
 This repository is established for the master thesis program, to generate 3D mapping based on 2D Lidar, 2 modes can be chosen, mapping along motion & mapping from static locations. The generated map can be compared with the metric.
 ---
 **Setup Work on Raspberry -pi**
@@ -13,9 +13,8 @@ The imu and stepper motor are connected via i2c, after the connection by wires,
 $ sudo i2cdetect -y 1
 
 ```
+For more i2c details, please refer to [i2c on Raspberry](http://skpang.co.uk/blog/archives/575)[SMBus python](https://github.com/pimoroni/py-smbus) is a python library for i2c protocol, to be used for our python coding.
 
-For more i2c installation details, please refer to [i2c on Raspberry](http://skpang.co.uk/blog/archives/575)<br />
-[SMBus python](https://github.com/pimoroni/py-smbus) is a python library for i2c protocol, to be used for our python coding.
 ---
 **Setup Work on Laptop**
 ---
