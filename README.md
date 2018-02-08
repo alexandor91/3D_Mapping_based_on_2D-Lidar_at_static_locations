@@ -1,8 +1,10 @@
 # Project: Portabal 3D Mapping device based on 2D Lidar
 This repository is established for the master thesis program, to generate 3D mapping based on 2D Lidar, 2 modes can be chosen, mapping along motion & mapping from static locations. The generated map can be compared with the metric.
+
 ---
 **Setup Work on Raspberry -pi**
 ---
+
 All the work is put in a "~/slam_ws" wrokspace. The most convenient method is to clone the current whole system image on the Raspi from the SD card, and back up it or burn it into additional SD card, this mirror image contains the built_in ros framework, and the i2c-tools via
 ```
 $ sudo apt-get install i2c-tools
@@ -18,7 +20,7 @@ For more i2c details, please refer to [i2c on Raspberry](http://skpang.co.uk/blo
 ---
 **Setup Work on Laptop**
 ---
-# Set up the Ros-kinetic version on your laptop
+
 ## 1.workspace at laptop
 Catkin-tools is integrated into the ros framework, the build and init of workspace can be referred in [catkin tool](http://catkin-tools.readthedocs.io/en/latest/installing.html). Copy catkin_ws, the whole folder into the home folder on your pc.
 ```
@@ -128,10 +130,12 @@ $ cd ~/catkin_ws/src/fusion_octomap/binary_maps/single-pose.ot
 $ octovis single-pose.ot
 
 ```
+
 ---
 **Run Ros Nodes**
 ---
-## Set up Ros network
+
+## 1. Set up Ros network
 The network should be set up to notify the nodes run on different machines,
 1. Make sure the raspberry and your PC, both are connected to a same wireless local network, all the machines are supposed to be connected to HUAWEI-681D, portable WIFI, on raspberry this should be checked via "ifconfig", because it may connect to other signals nearby. <br />
  
@@ -168,7 +172,7 @@ The name through "TAB" to be completed, or you can also run the node separately 
 $ rosrun package-name nodename
 
 ```
-## Change USB permission & port number
+## 2. Change USB permission & port number
 cd to the "/dev/ttyUSB*", then chang permission
  ```
 sudo chmod 666 /dev/ttyUSB*
@@ -204,10 +208,13 @@ Change the value of the name "serial_port" to the real number, for sweep this ca
                # Perform the scan
                scanner.perform_scan()
 ```
+
 The parameters of Sweep Lidar should be changed according real number, 
+
 ---
 **Reference Map Generation**
 ---
+
 ![overall nodes flow](node-flow.PNG)
 <br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Overall nodes flow<br />
 the upper part in figure "overall nodes flow", connected by dashed arrows, is the part for the reference map generation,
@@ -298,6 +305,7 @@ $ rosrun octomap_server octomap_saver mapfile.ot
 
 ```
 This will convert the pointcloud to octomap, by default the mapfile.ot will be put into directory "~/catkin_ws/devel/".
+
 ---
 **Map Generation along Motion**
 ---
@@ -335,7 +343,7 @@ $   <node name="Imu" pkg="mems_10dof" type="imu.py" output="screen"/>
 
 ```
 Change the node like above, in launch file, the "!-- ","--" is appended onto the start and end to comment the node, not to be executed, here the rasp-pi is packed into a plastic pack, so wires to connect imu can not pass through, so imu node is not activated in motion. But for data rosbag files, the imu data is also recorded into it, during experiment, the two rapsberry boards were utilized. imu file is locating in "~/slam_ws/src/mems_10dof/scripts/imu.py", the oublished topic from imu is "imu/data", which can visualized in rviz with imu class on left panel, just select the topic accordingly.
-## Nodes on Raspberry
+## Nodes on laptop
 3. Open a terminal on laptop. repeat the exporting process, or if you already copy the correct paths into ~/.bahrc file, just source bash file at root folder.
 ```
 $ source ~/catkin_ws/devel/setup.bash
@@ -374,6 +382,7 @@ $ roslaunch fusion_octomap view_octomap.launch
 $ rosrun octomap_server octomap_saver motion-mapfile.ot
 
 ```
+
 ---
 **Rosbag Files Play-back**
 ---
