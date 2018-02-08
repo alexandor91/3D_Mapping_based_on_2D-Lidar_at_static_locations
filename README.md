@@ -401,7 +401,7 @@ Then the topics and transforms will be published, and the synchronizer node can 
 **G. Metric**
 ---
 
-The "compare_octrees.cpp" is for metric evaluation over two maps, locating in "~/catkin_ws/src/fusion_octomap/src", the ot files  for octomap should be put into the "~/catkin_ws/src/fusion_octomap/binary_maps", then the path and file name should be added into the path variable within the "compare_octrees.cpp", from line 28 to l29, then run metric node in another terminal,
+The "compare_octrees.cpp" is for metric evaluation over two maps locationg in locating in "~/catkin_ws/src/fusion_octomap/src", the ot files after convert by octomap-server node is by default in devel folder, for octomap should be put into the "~/catkin_ws/src/fusion_octomap/binary_maps", then the path and file name should be added into the path variable within the "compare_octrees.cpp", from line 28 to l29, then run metric node in another terminal,
 ```
 $ rosrun fusion_octomap metricNode
 
