@@ -387,17 +387,18 @@ $ rosrun octomap_server octomap_saver motion-mapfile.ot
 **Rosbag Files Play-back**
 ---
 
-All the ropics from different sensor along with the transform between different frames is recorded into the bag files ,[rosbag command](http://wiki.ros.org/rosbag/Commandline) 
+All the ropics from different sensor along with the transform between different frames is recorded into the bag files ,[rosbag command](http://wiki.ros.org/rosbag/Commandline), play back bagfiles can be launched via commands below:
 ```
 $ cd /bagfiles
 $ rosbag play bagfilename.bag
 
 ```
-
 Then the topics and transforms will be published, and the synchronizer node can run in this node to verify the perfomance of the algorithm. play rate can be speeded up via "$ rosbag play -r 10 recorded1.bag", "r" is rate, there are two types of bagfiles, bag files with "moton" in name is for scanning along motion, with "static" in name is for scanning at static location. The bag files recorded along motion has two types, one is with recording of imu data, the others are without imu recording. "big-box" means the relative distance between sweep Lidar and Rplidar, the default distance for small box, which  supports the Rplidar, offset should be changed to the offsets, corresponding to big box. "synchronizer" is locating in "~/catkin_ws/src/fusion_octomap/src",  change the values in line63 and line 64 according to comments. Then recompile the whole workspace before the running of the node.
+
 ---
 **Metric**
 ---
+
 The "compare_octrees.cpp" is for metric evaluation over two maps, locating in "~/catkin_ws/src/fusion_octomap/src", the ot files  for octomap should be put into the "~/catkin_ws/src/fusion_octomap/binary_maps", then the path and file name should be added into the path variable within the "compare_octrees.cpp", from line 28 to l29, then run metric node in another terminal,
 ```
 $ rosrun fusion_octomap metricNode
