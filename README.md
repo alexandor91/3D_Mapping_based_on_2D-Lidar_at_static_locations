@@ -110,13 +110,12 @@ octovis is available in the ros-kinetic-octomap debian package. As an alternativ
 $ sudo apt-get install ros-kinetic-octovis
 
 ```
-The octomap is dumped into *.ot or *.bt file, these files are located in >"~/catkin_ws/src/fusion_octomap/binary_maps/*.ot", to open a *.ot file in octovis, the command is called as following, here, e.g. we want to open the single-pose.ot file:
+The octomap is dumped into *.ot or *.bt file, these files are located in >"~/catkin_ws/src/fusion_octomap/binary_maps/*.ot", to open a *.ot file in octovis, the command is called as following, here, e.g. we want to open the single-pose.ot file, The depth of octree, and the color can be modified in tool bar at right and at top of the octovis window:
 ```
 $ cd ~/catkin_ws/src/fusion_octomap/binary_maps/single-pose.ot
 $ octovis single-pose.ot
 
 ```
-The depth of octree, and the color can be modified in tool bar at right and at top of the octovis window.
 ---
 **Setup Work on Raspberry -pi**
 ---
@@ -196,7 +195,7 @@ the USB port should be consistent to the sensor's real port connecting to Raspbe
 ```
 Change the value of the name "serial_port" to the real number, for sweep this can be configured inside the python codes
  ```
-with Sweep('/dev/ttyUSB0') as sweep:
+ with Sweep('/dev/ttyUSB0') as sweep:
                # Create a scanner object
                time.sleep(1.0)
              
@@ -208,19 +207,20 @@ with Sweep('/dev/ttyUSB0') as sweep:
 
                # Perform the scan
                scanner.perform_scan()
-
 ```
 The parameters of Sweep Lidar should be changed according real number, 
 
 ---
 **Reference Map Generation**
 ---
-The reference map can be 
 # Nodes on Raspberry
 ![overall nodes flow](node-flow.PNG)
 <br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Overall nodes flow<br />
+the upper part in figure "overall nodes flow", connected by dashed arrows, is the part for the reference map generation,
+the following work is done sequentially as from node on Raspberry, untils the the pointcloud is filtered on laptop.
 ![nodes_static_scannning](nodes_static_scanning.png)
 <br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Static scanning<br />
+Figure "nodes_static_scanning" displays the actice nodes in static scanning mode, the rectangle inside each box is the topic, here two topic names, "/sweep_node/cloudpoint" from "sweep_node" and topic "pcl_filter/filtered_pcl" from node "pcl_filter". Finally pointcloud comes into octomap_server node.
 1. Setup IP  and MASTER_URI for this node and source the bash file:
 ```
 $ export ROS_MASTER_URI=http://192.168.8.--:11311
@@ -250,16 +250,78 @@ $ python scanner.py
 ```
 $ export ROS_MASTER_URI=http://192.168.8.--:11311
 $ export ROS_IP=http://192.168.8.*:11311
-source ~/slam_ws/devel/setup.bash
+$ source ~/slam_ws/devel/setup.bash
 
 ```
 call the service,
 ```
-rosservice call /sweep_node/times "Pose_num: 4"
-rosservice call /sweep_node/poses [400.0,800.0,800.0,400.0] [100.0,100.0,500.0,500.0] [94.0,94.0,94.0,94.0]
+$ rosservice call /sweep_node/times "Pose_num: 4"
+$ rosservice call /sweep_node/poses [400.0,800.0,800.0,400.0] [100.0,100.0,500.0,500.0] [94.0,94.0,94.0,94.0]
 
 ```
 Only the valus should be modified according to the real locations, the first value to "Pose_num" is number of locations, after the service is properly recieved, the "success" will be returned to the request terminal, then the second command is to provide the coordinate of each location, x-y-z in oder. <br />
-The scanning process at each location will be performed repeatedly.  
+The scanning process at each location will be performed repeatedly. Each scanning at a location has three stages, initiallization with settings, reset the base to trigger the limit switch, where the orientation is zero, then scannning is performed, after finish scanning, "finish" will be printed out, then stop the power for stepper motor, and move the whole kit to the new location, and power the stepper motor, after the completion of the resetting of base, the scanning process will be continued, after scanninng is finished at all locations, all the collected pointcloud will be published onto "/sweep_node/cloudpoint".
+# Nodes on Laptop
+1. Setup IP  and MASTER_URI for the launching node in terminal:
+```
+$ export ROS_MASTER_URI=http://192.168.8.--:11311
+$ export ROS_IP=http://192.168.8.*:11311
+$ source ~/catkin_ws/devel/setup.bash
 
+```
+The roscore will normally run on pc, so run the "roscore" in the terminal with exported IP  and MASTER_URI paths above.
+```
+$ roscore
+
+```
+2. launch the filter node to filter the raw measurement.
+```
+$ cd ~/catkin_ws/src/fusion_octomap/scripts/filter_reference.py
+$ python filter_normal.py
+
+```
+Here the filter nodes have two versions, "filter_normal.py" and "filter_reference.py", the codes within the "filter_reference.py", the additional statistical-outlier-removal filter, normal filter is with down-sampling filter to merge points in a grid area, pass-through filter is to pass the points in a certain range, along a defined axis. E.g., in "filter_normal.py"
+```
+LEAF_SIZE = 0.03   
+  .
+  .
+zaxis_min = 1.0
+zaxis_max = 3.0
+  .
+  .
+```
+Line 30 and line 45,46, 53, 54, 61, 62, are the configurable parameters for the filter. This should be changed depending on the raw pointcloud's quality. After filtering, the pointcloud will be dumped into pcd file after each filter step, the sweep node will publish always the same points in static scanning mode, so the storage is done only once, controlled by bool flag "filtered_flag".
+3. launch the octomap node. Still in a terminal with exported paths and sourced with the bash file, 
+```
+$ roslaunch fusion_octomap view_octomap.launch
+
+```
+Then rviz and octomap nodes will be launched,  normally the pointcloud will be visualized in rviz, which is subscribed to the filtered pointcloud topic.
+4. convert the pointcloud to octomap, open another terminal and repeat the exporting and source steps.
+```
+$ rosrun octomap_server octomap_saver mapfile.ot
+
+```
+This will convert the pointcloud to octomap, by default the mapfile.ot will be put into directory "~/catkin_ws/devel/".
+
+---
+** Map Generation along Motion**
+---
+# Nodes on Raspberry
+![overall nodes flow](node-flow.PNG)
+<br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Overall nodes flow<br />
+the bottom part in figure "overall nodes flow", connected by arrows with solid lines, is the part for the map generation along motion,
+the following work is done sequentially as from node on Raspberry, until the pointcloud is fused incrementally and filtered on laptop.
+![nodes_along_motion](nodes_along_motion.png)
+<br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Scanning along motion<br />
+![hector_startup](hector_startup.png)
+<br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Start-up Snapshot<br />
+
+1. Setup IP  and MASTER_URI for the launching node in terminal:
+```
+$ export ROS_MASTER_URI=http://192.168.8.--:11311
+$ export ROS_IP=http://192.168.8.*:11311
+$ source ~/catkin_ws/devel/setup.bash
+
+```
 
