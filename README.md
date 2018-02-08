@@ -117,7 +117,9 @@ $ octovis single-pose.ot
 
 ```
 ---
+
 **Setup Work on Raspberry -pi**
+
 ---
 All the work is put in a "~/slam_ws" wrokspace. The most convenient method is to clone the current whole system image on the Raspi from the SD card, and back up it or burn it into additional SD card, this mirror image contains the built_in ros framework, and the i2c-tools via
 ```
@@ -133,7 +135,9 @@ For more i2c installation details, please refer to [i2c on Raspberry](http://skp
 [SMBus python](https://github.com/pimoroni/py-smbus) is a python library for i2c protocol, to be used for our python coding.
 
 ---
+
 **Run Ros Nodes**
+
 ---
 # Set up Ros network
 The network should be set up to notify the nodes run on different machines,
@@ -211,9 +215,10 @@ Change the value of the name "serial_port" to the real number, for sweep this ca
 The parameters of Sweep Lidar should be changed according real number, 
 
 ---
+
 **Reference Map Generation**
+
 ---
-# Nodes on Raspberry
 ![overall nodes flow](node-flow.PNG)
 <br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Overall nodes flow<br />
 the upper part in figure "overall nodes flow", connected by dashed arrows, is the part for the reference map generation,
@@ -221,6 +226,7 @@ the following work is done sequentially as from node on Raspberry, untils the th
 ![nodes_static_scannning](nodes_static_scanning.png)
 <br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Static scanning<br />
 Figure "nodes_static_scanning" displays the actice nodes in static scanning mode, the rectangle inside each box is the topic, here two topic names, "/sweep_node/cloudpoint" from "sweep_node" and topic "pcl_filter/filtered_pcl" from node "pcl_filter". Finally pointcloud comes into octomap_server node.
+# Nodes on Raspberry
 1. Setup IP  and MASTER_URI for this node and source the bash file:
 ```
 $ export ROS_MASTER_URI=http://192.168.8.--:11311
@@ -276,7 +282,7 @@ $ roscore
 ```
 2. launch the filter node to filter the raw measurement.
 ```
-$ cd ~/catkin_ws/src/fusion_octomap/scripts/filter_reference.py
+$ cd ~/catkin_ws/src/fusion_octomap/scripts
 $ python filter_normal.py
 
 ```
@@ -305,23 +311,81 @@ $ rosrun octomap_server octomap_saver mapfile.ot
 This will convert the pointcloud to octomap, by default the mapfile.ot will be put into directory "~/catkin_ws/devel/".
 
 ---
-** Map Generation along Motion**
+
+**Map Generation along Motion**
+
 ---
-# Nodes on Raspberry
+
 ![overall nodes flow](node-flow.PNG)
 <br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Overall nodes flow<br />
 the bottom part in figure "overall nodes flow", connected by arrows with solid lines, is the part for the map generation along motion,
-the following work is done sequentially as from node on Raspberry, until the pointcloud is fused incrementally and filtered on laptop.
+the following work is done sequentially as from node on Raspberry, until the pointcloud is fused incrementally, the filtered on laptop is done offline, because filter used for reference map is in python, is not consisten with the pcl type in c++, so the filter is done offline, using other approach.
 ![nodes_along_motion](nodes_along_motion.png)
 <br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Scanning along motion<br />
-![hector_startup](hector_startup.png)
-<br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Start-up Snapshot<br />
 
-1. Setup IP  and MASTER_URI for the launching node in terminal:
+# Nodes on Raspberry
+1. Setup IP  and MASTER_URI for the launching node in terminal, same work as for reference map:
 ```
 $ export ROS_MASTER_URI=http://192.168.8.--:11311
 $ export ROS_IP=http://192.168.8.*:11311
+$ source ~/slam_ws/devel/setup.bash
+
+```
+Then cd to the repository and activate the sweep node for publishment of the scan continuously:
+```
+$ cd  ~/slam_ws/src/scanner_3d_scanner_3d
+$ python sweep_fusion.py
+
+```
+2. Open another terminal, do the same setting step, launch the Rplidat node, the port number should be checked before it.
+```
+$ cd  ~/slam_ws/src/rplidar_ros
+$ roslaunch rplidar_ros perception.launch
+
+```
+Then the Rpliar is supposed to be rotating. Here the imu node in line 10 is omitted, in perception.launch file,
+```
+$   <node name="Imu" pkg="mems_10dof" type="imu.py" output="screen"/>
+
+```
+Change the node like above, in launch file, the "!-- ","--" is appended onto the start and end to comment the node, not to be executed, here the rasp-pi is packed into a plastic pack, so wires to connect imu can not pass through, so imu node is not activated in motion. But for data rosbag files, the imu data is also recorded into it, during experiment, the two rapsberry boards were utilized. imu file is locating in "~/slam_ws/src/mems_10dof/scripts/imu.py", the oublished topic from imu is "imu/data", which can visualized in rviz with imu class on left panel, just select the topic accordingly.
+# Nodes on Raspberry
+3. Open a terminal on laptop. repeat the exporting process, or if you already copy the correct paths into ~/.bahrc file, just source bash file at root folder.
+```
 $ source ~/catkin_ws/devel/setup.bash
+$ cd ~/catkin_ws/src/fusion_octomap
+$ roslaunch fusio_octomap view_hectorSlam.launch
+
+```
+Then the rviz and hector are supposed to be lauched, normally it takes several waiting seconds until the grid map appears youn will see a green arrow pointing to the direction, which is oppostite to the front direction, with bule tape marked on the box of Rplidar.
+![hector_startup](hector_startup.png)
+<br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Start-up Snapshot<br />
+So Hectop will update the map from the measurements.
+3. Open a terminal on laptop. repeat the exporting process, then run the node to fuse topics together.
+```
+$ rosrun fusio_octomap synchronizer
+
+```
+4. Until the end of motion, you stop the sychronizer node via "ctl-c", then the fused points from multiple scans will be filtered, and then dumped into the fused_pcd.pcd file, 
+```
+  <node pkg="pcl_ros" type="pcd_to_pointcloud" name="spawn_pcd_to_pcl" output="screen" args    
+  ="~/catkin_ws/src/fusion_octomap/point_cloud/fused_pcd.pcd 0.1" >
+  
+```
+The pcd file name and the corresponding repository is supposed to be changed according the file name.
+```
+$ cd ~/catkin_ws/src/fusion_octomap/launch
+$ roslaunch fusion_octomap pcd_to_pcl.launch
+  
+```
+5. launch the octomap node.but the rviz node in line 21 shoould be commented out, view_octomap.launch locating in "~/catkin_ws/src/fusion_octomap/launch"
+```
+$ roslaunch fusion_octomap view_octomap.launch
+
+```
+6. convert the pointcloud to octomap, open another terminal and repeat the exporting and source steps.
+```
+$ rosrun octomap_server octomap_saver motion-mapfile.ot
 
 ```
 
