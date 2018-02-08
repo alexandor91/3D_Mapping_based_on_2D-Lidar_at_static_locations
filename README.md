@@ -2,7 +2,7 @@
 This repository is established for the master thesis program, to generate 3D mapping based on 2D Lidar, 2 modes can be chosen, mapping along motion & mapping from static locations. The generated map can be compared with the metric.
 
 ---
-**A Setup Work on Raspberry -pi**
+**A. Setup Work on Raspberry -pi**
 ---
 
 All the work is put in a "~/slam_ws" wrokspace. The most convenient method is to clone the current whole system image on the Raspi from the SD card, and back up it or burn it into additional SD card, this mirror image contains the built_in ros framework, and the i2c-tools via
@@ -18,7 +18,7 @@ $ sudo i2cdetect -y 1
 For more i2c details, please refer to [i2c on Raspberry](http://skpang.co.uk/blog/archives/575)[SMBus python](https://github.com/pimoroni/py-smbus) is a python library for i2c protocol, to be used for our python coding.
 
 ---
-**B Setup Work on Laptop**
+**B. Setup Work on Laptop**
 ---
 
 ## 1.workspace at laptop
@@ -132,7 +132,7 @@ $ octovis single-pose.ot
 ```
 
 ---
-**C Run Ros Nodes**
+**C. Run Ros Nodes**
 ---
 
 ## 1. Set up Ros network
@@ -212,7 +212,7 @@ Change the value of the name "serial_port" to the real number, for sweep this ca
 The parameters of Sweep Lidar should be changed according real number, 
 
 ---
-**D Reference Map Generation**
+**D. Reference Map Generation**
 ---
 
 ![overall nodes flow](node-flow.PNG)
@@ -308,7 +308,7 @@ $ rosrun octomap_server octomap_saver mapfile.ot
 This will convert the pointcloud to octomap, by default the mapfile.ot will be put into directory "~/catkin_ws/devel/".
 
 ---
-**E Map Generation along Motion**
+**E. Map Generation along Motion**
 ---
 
 ![overall nodes flow](node-flow.PNG)
@@ -386,7 +386,7 @@ $ rosrun octomap_server octomap_saver motion-mapfile.ot
 ```
 
 ---
-**F Rosbag Files Play-back**
+**F. Rosbag Files Play-back**
 ---
 
 All the ropics from different sensor along with the transform between different frames is recorded into the bag files ,[rosbag command](http://wiki.ros.org/rosbag/Commandline), play back bagfiles can be launched via commands below:
@@ -398,7 +398,7 @@ $ rosbag play bagfilename.bag
 Then the topics and transforms will be published, and the synchronizer node can run in this node to verify the perfomance of the algorithm. play rate can be speeded up via "$ rosbag play -r 10 recorded1.bag", "r" is rate, there are two types of bagfiles, bag files with "moton" in name is for scanning along motion, with "static" in name is for scanning at static location. The bag files recorded along motion has two types, one is with recording of imu data, the others are without imu recording. "big-box" means the relative distance between sweep Lidar and Rplidar, the default distance for small box, which  supports the Rplidar, offset should be changed to the offsets, corresponding to big box. "synchronizer" is locating in "~/catkin_ws/src/fusion_octomap/src",  change the values in line63 and line 64 according to comments. Then recompile the whole workspace before the running of the node.
 
 ---
-**G Metric**
+**G. Metric**
 ---
 
 The "compare_octrees.cpp" is for metric evaluation over two maps, locating in "~/catkin_ws/src/fusion_octomap/src", the ot files  for octomap should be put into the "~/catkin_ws/src/fusion_octomap/binary_maps", then the path and file name should be added into the path variable within the "compare_octrees.cpp", from line 28 to l29, then run metric node in another terminal,
