@@ -217,6 +217,8 @@ The parameters of Sweep Lidar should be changed according real number,
 ---
 The reference map can be 
 # Nodes on Raspberry
+![overall nodes flow](node-flow.PNG)
+<br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Overall nodes flow<br />
 ![nodes_static_scannning](nodes_static_scanning.png)
 <br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Static scanning<br />
 1. Setup IP  and MASTER_URI for this node and source the bash file:
@@ -228,14 +230,14 @@ $ source ~/slam_ws/devel/setup.bash
 ```
 2. cd to the path "/slam_ws/src/scanner_3d/scanner_3d/", within the scan_settings.py, the line 26 to line 35
 ```
-        if motor_speed is None:
-            motor_speed = sweep_constants.MOTOR_SPEED_2_HZ  # 1HZ
-        if sample_rate is None:
-            sample_rate = sweep_constants.SAMPLE_RATE_1000_HZ  #500HZ
-        if deadzone is None:
-            deadzone = 135  #135
-        if scan_range is None:
-            scan_range = 180  #180
+if motor_speed is None:
+   motor_speed = sweep_constants.MOTOR_SPEED_2_HZ  # 1HZ
+if sample_rate is None:
+   sample_rate = sweep_constants.SAMPLE_RATE_1000_HZ  #500HZ
+if deadzone is None:
+   deadzone = 135  #135
+if scan_range is None:
+   scan_range = 180  #180
 
 ```
 The first two line are the rotating speed and sampling rate, these parameters shoudl be changed before the main node is running up. These default parameters will be loaded into the Lidar, 
