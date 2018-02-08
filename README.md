@@ -2,7 +2,7 @@
 This repository is established for the master thesis program, to generate 3D mapping based on 2D Lidar, 2 modes can be chosen, mapping along motion & mapping from static locations. The generated map can be compared with the metric.
 
 ---
-**Setup Work on Raspberry -pi**
+**A Setup Work on Raspberry -pi**
 ---
 
 All the work is put in a "~/slam_ws" wrokspace. The most convenient method is to clone the current whole system image on the Raspi from the SD card, and back up it or burn it into additional SD card, this mirror image contains the built_in ros framework, and the i2c-tools via
@@ -18,7 +18,7 @@ $ sudo i2cdetect -y 1
 For more i2c details, please refer to [i2c on Raspberry](http://skpang.co.uk/blog/archives/575)[SMBus python](https://github.com/pimoroni/py-smbus) is a python library for i2c protocol, to be used for our python coding.
 
 ---
-**Setup Work on Laptop**
+**B Setup Work on Laptop**
 ---
 
 ## 1.workspace at laptop
@@ -46,24 +46,24 @@ this (PCL) is a standalone, large scale, open project for 2D/3D image and point 
 <b>3.1 Integration with ROS</b> PCL (verison 1.7) is the backbone of ROS to process the 3D pointcloud, The library is written in c++, the installed Ros-kinetic, by default includes already the pcl-ros package. If you want to use PCL in you own project, like some other packages created by your own, follow the tutorials here, [PCL in your own project](http://pointclouds.org/documentation/tutorials/using_pcl_pcl_config.php#using-pcl-pcl-config), here the ralative path >"~/catkin_ws/src/fusion_octomap/CMakeLists.txt" is already modified according to the tutorial, so this own defined package can be directly compiled properly.<br />
 2 <b>3.2 PCL python</b> My code for Sweep lidar node is written in python, so the pcl python libarry should also be installed, in fact, >python-pcl includes a subset of functionalites of pcl, but that's enough.<br />
 Some basic commands to install python-pcl are:
-### Install cython
+### 3.1 Install cython
 ```
 $ sudo pip install cython
 
 ```
-### Build and Install pcl-python
+### 3.2 Build and Install pcl-python
 ```
 $ cd ~/catkin_ws/src/python-pcl
 $ python setup.py build
 $ sudo python setup.py install
 
 ```
-### Install pcl-tools
+### 3.3 Install pcl-tools
 ```
 $ sudo apt-get install pcl-tools
 
 ```
-### Documentation for pcl_helper.py
+### 3.4 Documentation for pcl_helper.py
 pcl_helper.py contains useful functions for working with point cloud data with ROS and PCL. The file itself is located in >"~/catkin_ws/src/fusion_octomap/scripts/pcl_helper.py", Functions used in my workspace:
 ```
 ros_to_pcl(sensor_msgs/PointCloud2)
@@ -132,19 +132,19 @@ $ octovis single-pose.ot
 ```
 
 ---
-**Run Ros Nodes**
+**C Run Ros Nodes**
 ---
 
 ## 1. Set up Ros network
 The network should be set up to notify the nodes run on different machines,
-1. Make sure the raspberry and your PC, both are connected to a same wireless local network, all the machines are supposed to be connected to HUAWEI-681D, portable WIFI, on raspberry this should be checked via "ifconfig", because it may connect to other signals nearby. <br />
+1.1 Make sure the raspberry and your PC, both are connected to a same wireless local network, all the machines are supposed to be connected to HUAWEI-681D, portable WIFI, on raspberry this should be checked via "ifconfig", because it may connect to other signals nearby. <br />
  
-2. Change the ip address, the ip address file is located in "etc/hosts" on ubuntu system directory. open the hosts with root permission and copy the ip address of your pc and raspberry, e.g., format is ip address followed by hostname <br />:
+1.2 Change the ip address, the ip address file is located in "etc/hosts" on ubuntu system directory. open the hosts with root permission and copy the ip address of your pc and raspberry, e.g., format is ip address followed by hostname <br />:
 ```
 192.168.8.102	desktop
 
 ```
-3. Export your ip address into the terminal where you will launch the node later, this should be done both for raspberry and you pc, you can use ssh to remotely log into the raspberry and do the settings remotely.<br />
+1.3 Export your ip address into the terminal where you will launch the node later, this should be done both for raspberry and you pc, you can use ssh to remotely log into the raspberry and do the settings remotely.<br />
 ```
 $ export ROS_MASTER_URI=http://192.168.8.--:11311
 $ export ROS_IP=http://192.168.8.*:11311
@@ -156,13 +156,13 @@ $ echo 'export ROS_MASTER_URI=http://192.168.8.--:11311' >> ~/.bashrc
 $ echo 'export ROS_IP=http://192.168.8.--:11311' >> ~/.bashrc 
 
 ```
-4. Export your ip address into the terminal where you will launch the node later<br />
-5. Call the roscore on the machine whose IP address is consistent with ROS_MASTER_URI. The terminal shouldn't be terminated during the whole working process, because it is responsible for communication between different nodes.<br /> 
+1.4. Export your ip address into the terminal where you will launch the node later<br />
+1.5. Call the roscore on the machine whose IP address is consistent with ROS_MASTER_URI. The terminal shouldn't be terminated during the whole working process, because it is responsible for communication between different nodes.<br /> 
 ```
 $ roscore
 
 ```
-6. Run Ros nodes in the workspace, which is compiled, each node is an individual process, there are two way for running of these nodes, one is through launch file to launch a batch of nodes sequentially,<br />
+1.6. Run Ros nodes in the workspace, which is compiled, each node is an individual process, there are two way for running of these nodes, one is through launch file to launch a batch of nodes sequentially,<br />
  ```
 $ roslaunch package-name launchfile-name.launch
 
@@ -212,7 +212,7 @@ Change the value of the name "serial_port" to the real number, for sweep this ca
 The parameters of Sweep Lidar should be changed according real number, 
 
 ---
-**Reference Map Generation**
+**D Reference Map Generation**
 ---
 
 ![overall nodes flow](node-flow.PNG)
@@ -222,7 +222,7 @@ the following work is done sequentially as from node on Raspberry, untils the th
 ![nodes_static_scannning](nodes_static_scanning.png)
 <br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Static scanning<br />
 Figure "nodes_static_scanning" displays the actice nodes in static scanning mode, the rectangle inside each box is the topic, here two topic names, "/sweep_node/cloudpoint" from "sweep_node" and topic "pcl_filter/filtered_pcl" from node "pcl_filter". Finally pointcloud comes into octomap_server node.
-## Nodes on Raspberry
+##　Nodes on Raspberry
 1. Setup IP  and MASTER_URI for this node and source the bash file:
 ```
 $ export ROS_MASTER_URI=http://192.168.8.--:11311
@@ -307,7 +307,7 @@ $ rosrun octomap_server octomap_saver mapfile.ot
 This will convert the pointcloud to octomap, by default the mapfile.ot will be put into directory "~/catkin_ws/devel/".
 
 ---
-**Map Generation along Motion**
+**E Map Generation along Motion**
 ---
 
 ![overall nodes flow](node-flow.PNG)
@@ -384,7 +384,7 @@ $ rosrun octomap_server octomap_saver motion-mapfile.ot
 ```
 
 ---
-**Rosbag Files Play-back**
+**F Rosbag Files Play-back**
 ---
 
 All the ropics from different sensor along with the transform between different frames is recorded into the bag files ,[rosbag command](http://wiki.ros.org/rosbag/Commandline), play back bagfiles can be launched via commands below:
@@ -396,7 +396,7 @@ $ rosbag play bagfilename.bag
 Then the topics and transforms will be published, and the synchronizer node can run in this node to verify the perfomance of the algorithm. play rate can be speeded up via "$ rosbag play -r 10 recorded1.bag", "r" is rate, there are two types of bagfiles, bag files with "moton" in name is for scanning along motion, with "static" in name is for scanning at static location. The bag files recorded along motion has two types, one is with recording of imu data, the others are without imu recording. "big-box" means the relative distance between sweep Lidar and Rplidar, the default distance for small box, which  supports the Rplidar, offset should be changed to the offsets, corresponding to big box. "synchronizer" is locating in "~/catkin_ws/src/fusion_octomap/src",  change the values in line63 and line 64 according to comments. Then recompile the whole workspace before the running of the node.
 
 ---
-**Metric**
+**G Metric**
 ---
 
 The "compare_octrees.cpp" is for metric evaluation over two maps, locating in "~/catkin_ws/src/fusion_octomap/src", the ot files  for octomap should be put into the "~/catkin_ws/src/fusion_octomap/binary_maps", then the path and file name should be added into the path variable within the "compare_octrees.cpp", from line 28 to l29, then run metric node in another terminal,
