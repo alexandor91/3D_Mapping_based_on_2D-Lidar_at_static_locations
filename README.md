@@ -263,6 +263,7 @@ $ rosservice call /sweep_node/poses [400.0,800.0,800.0,400.0] [100.0,100.0,500.0
 ```
 Only the valus should be modified according to the real locations, the first value to "Pose_num" is number of locations, after the service is properly recieved, the "success" will be returned to the request terminal, then the second command is to provide the coordinate of each location, x-y-z in oder. <br />
 The scanning process at each location will be performed repeatedly. Each scanning at a location has three stages, initiallization with settings, reset the base to trigger the limit switch, where the orientation is zero, then scannning is performed, after finish scanning, "finish" will be printed out, then stop the power for stepper motor, and move the whole kit to the new location, and power the stepper motor, after the completion of the resetting of base, the scanning process will be continued, after scanninng is finished at all locations, all the collected pointcloud will be published onto "/sweep_node/cloudpoint".
+
 ## Nodes on Laptop
 1. Setup IP  and MASTER_URI for the launching node in terminal:
 ```
@@ -343,8 +344,9 @@ $   <node name="Imu" pkg="mems_10dof" type="imu.py" output="screen"/>
 
 ```
 Change the node like above, in launch file, the "!-- ","--" is appended onto the start and end to comment the node, not to be executed, here the rasp-pi is packed into a plastic pack, so wires to connect imu can not pass through, so imu node is not activated in motion. But for data rosbag files, the imu data is also recorded into it, during experiment, the two rapsberry boards were utilized. imu file is locating in "~/slam_ws/src/mems_10dof/scripts/imu.py", the oublished topic from imu is "imu/data", which can visualized in rviz with imu class on left panel, just select the topic accordingly.
+
 ## Nodes on laptop
-3. Open a terminal on laptop. repeat the exporting process, or if you already copy the correct paths into ~/.bahrc file, just source bash file at root folder.
+1. Open a terminal on laptop. repeat the exporting process, or if you already copy the correct paths into ~/.bahrc file, just source bash file at root folder.
 ```
 $ source ~/catkin_ws/devel/setup.bash
 $ cd ~/catkin_ws/src/fusion_octomap
@@ -355,12 +357,12 @@ Then the rviz and hector are supposed to be lauched, normally it takes several w
 ![hector_startup](hector_startup.png)
 <br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;Start-up Snapshot<br />
 So Hectop will update the map from the measurements.
-3. Open a terminal on laptop. repeat the exporting process, then run the node to fuse topics together.
+2. Open a terminal on laptop. repeat the exporting process, then run the node to fuse topics together.
 ```
 $ rosrun fusio_octomap synchronizer
 
 ```
-4. Until the end of motion, you stop the sychronizer node via "ctl-c", then the fused points from multiple scans will be filtered, and then dumped into the fused_pcd.pcd file, 
+3. Until the end of motion, you stop the sychronizer node via "ctl-c", then the fused points from multiple scans will be filtered, and then dumped into the fused_pcd.pcd file, 
 ```
   <node pkg="pcl_ros" type="pcd_to_pointcloud" name="spawn_pcd_to_pcl" output="screen" args    
   ="~/catkin_ws/src/fusion_octomap/point_cloud/fused_pcd.pcd 0.1" >
@@ -372,12 +374,12 @@ $ cd ~/catkin_ws/src/fusion_octomap/launch
 $ roslaunch fusion_octomap pcd_to_pcl.launch
   
 ```
-5. launch the octomap node.but the rviz node in line 21 shoould be commented out, view_octomap.launch locating in "~/catkin_ws/src/fusion_octomap/launch"
+4. launch the octomap node.but the rviz node in line 21 shoould be commented out, view_octomap.launch locating in "~/catkin_ws/src/fusion_octomap/launch"
 ```
 $ roslaunch fusion_octomap view_octomap.launch
 
 ```
-6. convert the pointcloud to octomap, open another terminal and repeat the exporting and source steps.
+5. convert the pointcloud to octomap, open another terminal and repeat the exporting and source steps.
 ```
 $ rosrun octomap_server octomap_saver motion-mapfile.ot
 
