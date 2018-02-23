@@ -307,5 +307,6 @@ $ rosrun octomap_server octomap_saver mapfile.ot
 This will convert the pointcloud to octomap, by default the mapfile.ot will be put into directory "~/catkin_ws/devel/".
 
 ---
+The kit used for spherical scanning is demonstrated below.
 ![3D_scanning_kit](3D_scanning.jpg)
 <br />&emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp; &emsp; &emsp;  &emsp;  &emsp;&emsp; &emsp;  &emsp;  &emsp;2D scanning kit<br />
